@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://img2.imgtp.com/2024/03/17/3cQ8eN3X.png" alt="BookKeep Logo" width="200" height="200">
+  <img src="assets/images/app_icon.png" alt="BookKeep Logo" width="200" height="200">
   <h1>BookKeep 📱</h1>
   <p><a href="#chinese">简体中文</a> | <a href="#english">English</a></p>
   <p>一款高效、易用的开源记账软件，帮助用户轻松管理个人财务，实现财富增长</p>
