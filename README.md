@@ -16,18 +16,18 @@ A lightweight Flutter expense tracker focused on fast entry, clear summaries, an
 
 ```
 lib/
-������ core/
-��   ������ theme/              # App theme and styling
-��   ������ utils/              # Formatters and helpers
-��   ������ widgets/            # Shared UI components
-������ data/
-��   ������ database/           # SQLite helper + migrations
-��   ������ models/             # Data models
-��   ������ repositories/       # Data access layer
-������ state/                  # Riverpod state and providers
-������ ui/
-    ������ screens/             # Pages and navigation shell
-    ������ widgets/             # Feature widgets
+├── core/
+│   ├── theme/              # App theme and styling
+│   ├── utils/              # Formatters and helpers
+│   └── widgets/            # Shared UI components
+├── data/
+│   ├── database/           # SQLite helper + migrations
+│   ├── models/             # Data models
+│   └── repositories/       # Data access layer
+├── state/                  # Riverpod state and providers
+└── ui/
+    ├── screens/             # Pages and navigation shell
+    └── widgets/             # Feature widgets
 ```
 
 ## Running the App
@@ -50,7 +50,7 @@ flutter run
 - File extension: `.csv`
 - Field separator: `TAB` (`\t`)
 - Supported headers:
-  - English: `Date	Type	Category	Amount	Note`
+  - English: `Date\tType\tCategory\tAmount\tNote`
 - Supported date formats: `yyyy-MM-dd`, `yyyy/MM/dd`, `yyyy-MM-dd HH:mm:ss`
 
 ## Extensibility Ideas
