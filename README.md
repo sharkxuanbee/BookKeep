@@ -61,7 +61,7 @@
 1. **克隆仓库**:
 
 ```bash
-git clone https://github.com/yourusername/bookkeep.git
+git clone https://github.com/sharkxuanbee/bookkeep.git
 cd bookkeep
 ```
 
@@ -170,9 +170,9 @@ A: 可以通过导出 CSV 文件进行备份，未来将支持自动备份功能
 ## 📞 联系方式
 
 如果您有任何问题或建议，欢迎通过以下方式联系我们：
-- 项目地址: [GitHub](https://github.com/yourusername/bookkeep)
-- 问题反馈: [Issues](https://github.com/yourusername/bookkeep/issues)
-- 讨论交流: [Discussions](https://github.com/yourusername/bookkeep/discussions)
+- 项目地址: [GitHub](https://github.com/sharkxuanbee/bookkeep)
+- 问题反馈: [Issues](https://github.com/sharkxuanbee/bookkeep/issues)
+- 讨论交流: [Discussions](https://github.com/sharkxuanbee/bookkeep/discussions)
 
 ---
 
@@ -238,7 +238,7 @@ A: 可以通过导出 CSV 文件进行备份，未来将支持自动备份功能
 1. **Clone the repository**:
 
 ```bash
-git clone https://github.com/yourusername/bookkeep.git
+git clone https://github.com/sharkxuanbee/bookkeep.git
 cd bookkeep
 ```
 
@@ -347,9 +347,9 @@ A: You can backup data by exporting CSV files. Automatic backup functionality wi
 ## 📞 Contact
 
 If you have any questions or suggestions, please feel free to contact us through:
-- Project URL: [GitHub](https://github.com/yourusername/bookkeep)
-- Issue Reporting: [Issues](https://github.com/yourusername/bookkeep/issues)
-- Discussion: [Discussions](https://github.com/yourusername/bookkeep/discussions)
+- Project URL: [GitHub](https://github.com/sharkxuanbee/bookkeep)
+- Issue Reporting: [Issues](https://github.com/sharkxuanbee/bookkeep/issues)
+- Discussion: [Discussions](https://github.com/sharkxuanbee/bookkeep/discussions)
 
 ---
 
