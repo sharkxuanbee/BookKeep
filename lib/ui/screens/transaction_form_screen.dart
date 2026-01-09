@@ -198,7 +198,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: _category,
+                initialValue: _category,
                 items: availableCategories
                     .map((category) => DropdownMenuItem(value: category, child: Text(category)))
                     .toList(),

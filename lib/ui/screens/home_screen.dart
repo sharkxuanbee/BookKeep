@@ -9,7 +9,6 @@ import '../../core/utils/formatters.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/section_header.dart';
 import '../../data/models/transaction.dart';
-import '../../data/repositories/transaction_repository.dart';
 import '../../state/category_provider.dart';
 import '../../state/transaction_provider.dart';
 import '../widgets/filter_panel.dart';
