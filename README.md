@@ -23,9 +23,9 @@ BookKeep 是一款现代、轻量的 Flutter 记账软件，提供快速录入�
 - **多语言**: 内置 10 种语言，设置页可切换并持久化
 
 ## 📸 截图（占位）
-![Analytics](assets/images/analytics_placeholder.svg)
-![Ranking](assets/images/ranking_placeholder.svg)
-![Localization](assets/images/localization_placeholder.svg)
+![Analytics](assets/images/Screenshot_2026-01-10-08-15-24-56_8f04ff8f547e832b4244d2cb4a3de341.jpg)
+![Ranking](assets/images/Screenshot_2026-01-10-08-15-28-91_8f04ff8f547e832b4244d2cb4a3de341.jpg)
+![Localization](assets/images/Screenshot_2026-01-10-08-15-33-33_8f04ff8f547e832b4244d2cb4a3de341.jpg)
 
 ## 🚀 快速开始
 ```bash
@@ -70,9 +70,9 @@ BookKeep is a modern, lightweight Flutter bookkeeping app with fast entry, clear
 - **Localization**: 10 languages with a settings toggle and persistence
 
 ## 📸 Screenshots (placeholders)
-![Analytics](assets/images/analytics_placeholder.svg)
-![Ranking](assets/images/ranking_placeholder.svg)
-![Localization](assets/images/localization_placeholder.svg)
+![Analytics](assets/images/Screenshot_2026-01-10-08-15-24-56_8f04ff8f547e832b4244d2cb4a3de341.jpg)
+![Ranking](assets/images/Screenshot_2026-01-10-08-15-28-91_8f04ff8f547e832b4244d2cb4a3de341.jpg)
+![Localization](assets/images/Screenshot_2026-01-10-08-15-33-33_8f04ff8f547e832b4244d2cb4a3de341.jpg)
 
 ## 🚀 Getting Started
 ```bash
