@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/utils/formatters.dart';
+import '../../core/utils/localization_ext.dart';
 import '../../data/models/transaction.dart';
 
 class TransactionCard extends StatelessWidget {
@@ -39,7 +40,7 @@ class TransactionCard extends StatelessWidget {
           style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         subtitle: Text(
-          transaction.note.isEmpty ? 'No note' : transaction.note,
+          transaction.note.isEmpty ? context.l10n.unspecifiedNoteLabel : transaction.note,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
@@ -49,10 +50,10 @@ class TransactionCard extends StatelessWidget {
           children: [
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '${isIncome ? '+' : '-'}${Formatters.currency.format(transaction.amount)}',
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '${isIncome ? '+' : '-'}${Formatters.currencyText(amount: transaction.amount, locale: context.locale)}',
                   style: theme.textTheme.titleSmall?.copyWith(
                     color: isIncome ? theme.colorScheme.primary : theme.colorScheme.error,
                     fontWeight: FontWeight.bold,

@@ -1,0 +1,162 @@
+{
+  "@@locale": "en",
+  "appTitle": "Bookkeeping",
+  "navRecords": "Records",
+  "navStats": "Analytics",
+  "navSettings": "Settings",
+  "actionCancel": "Cancel",
+  "actionSave": "Save",
+  "actionDelete": "Delete",
+  "actionImport": "Import",
+  "actionExport": "Export",
+  "actionApply": "Apply",
+  "actionReset": "Reset",
+  "actionAdd": "Add",
+  "actionEdit": "Edit",
+  "recordsTitle": "Records",
+  "searchHint": "Search category or note",
+  "sortDateNewest": "Sort by date (newest)",
+  "sortDateOldest": "Sort by date (oldest)",
+  "sortAmountHigh": "Sort by amount (high)",
+  "sortAmountLow": "Sort by amount (low)",
+  "filterTitle": "Filters",
+  "filterSelectDateRange": "Select date range",
+  "filterType": "Type",
+  "filterCategory": "Category",
+  "filterAll": "All",
+  "filterIncome": "Income",
+  "filterExpense": "Expense",
+  "clearFilters": "Clear filters",
+  "noRecordsTitle": "No records yet",
+  "noRecordsMessage": "Add your first transaction to start tracking.",
+  "groupedByAmountHeader": "Sorted by amount",
+  "deleteRecordTitle": "Delete record",
+  "deleteRecordMessage": "Are you sure you want to delete this record?",
+  "importCsvMenu": "Import CSV",
+  "exportCsvMenu": "Export",
+  "importDialogTitle": "Confirm import",
+  "importConfirmMessage": "Import {count} records?",
+  "@importConfirmMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importSuccess": "Imported {count} records.",
+  "@importSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "importFailed": "Import failed: {message}",
+  "@importFailed": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "exportFailed": "Export failed: {message}",
+  "@exportFailed": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "newRecordTitle": "New record",
+  "editRecordTitle": "Edit record",
+  "dateLabel": "Date",
+  "typeLabel": "Type",
+  "incomeLabel": "Income",
+  "expenseLabel": "Expense",
+  "balanceLabel": "Balance",
+  "categoryLabel": "Category",
+  "newCategoryButton": "New",
+  "amountLabel": "Amount",
+  "amountValidationRequired": "Enter an amount.",
+  "amountValidationPositive": "Enter a valid amount.",
+  "categoryValidation": "Select a category.",
+  "noteLabel": "Note",
+  "noteHint": "Optional note",
+  "addRecordButton": "Add record",
+  "saveChangesButton": "Save changes",
+  "addCategoryDialogTitle": "Add category",
+  "renameCategoryDialogTitle": "Rename category",
+  "categoryNameLabel": "Category name",
+  "categoryNameValidation": "Enter a category name.",
+  "uncategorizedLabel": "Uncategorized",
+  "categoriesTitle": "Categories",
+  "systemCategorySubtitle": "System category",
+  "customCategorySubtitle": "Custom category",
+  "emptyCategoriesMessage": "No categories available yet.",
+  "addCategoryFab": "Add category",
+  "settingsTitle": "Settings",
+  "appearanceTitle": "Appearance",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "languageTitle": "Language",
+  "languageSystem": "Follow system (default)",
+  "languageEnglish": "English",
+  "languageChineseSimplified": "Simplified Chinese",
+  "languageChineseTraditional": "Traditional Chinese",
+  "languageJapanese": "Japanese",
+  "languageKorean": "Korean",
+  "languageSpanish": "Spanish",
+  "languageFrench": "French",
+  "languageGerman": "German",
+  "languagePortuguese": "Portuguese (Brazil)",
+  "languageRussian": "Russian",
+  "categoriesSectionTitle": "Categories",
+  "manageCategoriesTitle": "Manage categories",
+  "manageCategoriesSubtitle": "Add, rename, and disable categories",
+  "analyticsTitle": "Analytics",
+  "monthlyBudgetTitle": "Monthly budget",
+  "setBudgetButton": "Set budget",
+  "editBudgetButton": "Edit budget",
+  "noBudgetMessage": "No budget set for this month.",
+  "budgetUsageMessage": "Used {used} of {total}",
+  "@budgetUsageMessage": {
+    "placeholders": {
+      "used": {},
+      "total": {}
+    }
+  },
+  "budgetExceeded": "Budget exceeded.",
+  "budgetUsedPercent": "{percent}% used",
+  "@budgetUsedPercent": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "removeBudgetButton": "Remove budget",
+  "expenseBreakdownTitle": "Expense breakdown",
+  "incomeBreakdownTitle": "Income breakdown",
+  "noExpenseDataMessage": "No expense data for this range.",
+  "noIncomeDataMessage": "No income data for this range.",
+  "chartEmptyMessage": "No data to display.",
+  "chartTypeLabel": "Chart type",
+  "chartTypePie": "Pie",
+  "chartTypeBar": "Bar",
+  "chartTypeLine": "Line",
+  "periodLabel": "Period",
+  "periodMonth": "Month",
+  "periodYear": "Year",
+  "yearLabel": "Year",
+  "monthLabel": "Month",
+  "typeFilterLabel": "Object",
+  "typeAll": "All",
+  "categoryRankingTitle": "Expense ranking",
+  "viewAllButton": "View all",
+  "topNLabel": "Top {count}",
+  "@topNLabel": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "drilldownTitle": "Category details",
+  "drilldownTransactionsTitle": "Transactions",
+  "noteRankingTitle": "Note breakdown",
+  "unspecifiedNoteLabel": "Unspecified",
+  "defaultFileName": "Bookkeeping.csv"
+}

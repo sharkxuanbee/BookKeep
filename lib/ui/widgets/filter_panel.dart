@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/utils/formatters.dart';
+import '../../core/utils/localization_ext.dart';
 import '../../data/models/transaction.dart';
 import '../../state/transaction_provider.dart';
 
@@ -82,6 +83,7 @@ class _FilterPanelState extends State<FilterPanel> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Card(
       child: Padding(
@@ -89,7 +91,7 @@ class _FilterPanelState extends State<FilterPanel> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Filters', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+            Text(l10n.filterTitle, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
             const SizedBox(height: 16),
             InkWell(
               onTap: () async {
@@ -123,7 +125,7 @@ class _FilterPanelState extends State<FilterPanel> {
                   children: [
                     Text(
                       _dateRange == null
-                          ? 'Select date range'
+                          ? l10n.filterSelectDateRange
                           : '${Formatters.date.format(_dateRange!.start)} - ${Formatters.date.format(_dateRange!.end)}',
                       style: theme.textTheme.bodyMedium,
                     ),
@@ -133,13 +135,13 @@ class _FilterPanelState extends State<FilterPanel> {
               ),
             ),
             const SizedBox(height: 16),
-            Text('Type', style: theme.textTheme.bodyMedium),
+            Text(l10n.filterType, style: theme.textTheme.bodyMedium),
             const SizedBox(height: 8),
             SegmentedButton<TransactionType?>(
-              segments: const [
-                ButtonSegment(value: null, label: Text('All')),
-                ButtonSegment(value: TransactionType.income, label: Text('Income')),
-                ButtonSegment(value: TransactionType.expense, label: Text('Expense')),
+              segments: [
+                ButtonSegment(value: null, label: Text(l10n.filterAll)),
+                ButtonSegment(value: TransactionType.income, label: Text(l10n.incomeLabel)),
+                ButtonSegment(value: TransactionType.expense, label: Text(l10n.expenseLabel)),
               ],
               selected: {_type},
               onSelectionChanged: (newSelection) {
@@ -151,14 +153,14 @@ class _FilterPanelState extends State<FilterPanel> {
             ),
             const SizedBox(height: 16),
             if (_availableCategories.isNotEmpty) ...[
-              Text('Category', style: theme.textTheme.bodyMedium),
+              Text(l10n.filterCategory, style: theme.textTheme.bodyMedium),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
                   FilterChip(
-                    label: const Text('All'),
+                    label: Text(l10n.filterAll),
                     selected: _category == null,
                     onSelected: (_) {
                       setState(() {
@@ -181,17 +183,17 @@ class _FilterPanelState extends State<FilterPanel> {
               ),
               const SizedBox(height: 16),
             ],
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(onPressed: _resetFilters, child: const Text('Reset')),
-                const SizedBox(width: 8),
-                ElevatedButton(onPressed: _applyFilters, child: const Text('Apply')),
-              ],
-            ),
-          ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(onPressed: _resetFilters, child: Text(l10n.actionReset)),
+                  const SizedBox(width: 8),
+                  ElevatedButton(onPressed: _applyFilters, child: Text(l10n.actionApply)),
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
     );
   }
 }

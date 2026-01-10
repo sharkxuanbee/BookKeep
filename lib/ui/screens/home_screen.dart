@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/utils/formatters.dart';
+import '../../core/utils/localization_ext.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/section_header.dart';
 import '../../data/models/transaction.dart';
+import '../../data/repositories/transaction_repository.dart';
 import '../../state/category_provider.dart';
 import '../../state/transaction_provider.dart';
 import '../widgets/filter_panel.dart';
@@ -60,27 +62,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _importCsv() async {
     final repo = ref.read(transactionRepositoryProvider);
+    final l10n = context.l10n;
 
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: const ['csv'],
-        dialogTitle: 'Select a CSV file',
+        dialogTitle: l10n.importCsvMenu,
       );
 
       if (result != null && result.files.isNotEmpty) {
         final file = File(result.files.single.path!);
-        final transactions = await repo.importFromCsv(file);
+        final transactions = await repo.importFromFile(file);
         if (!mounted) return;
 
         final confirm = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Confirm import'),
-            content: Text('Import ${transactions.length} records?'),
+            title: Text(l10n.importDialogTitle),
+            content: Text(l10n.importConfirmMessage(transactions.length)),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-              ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Import')),
+              TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.actionCancel)),
+              ElevatedButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.actionImport)),
             ],
           ),
         );
@@ -89,26 +92,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           await ref.read(transactionNotifierProvider.notifier).importTransactions(transactions);
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Imported ${transactions.length} records.')),
+            SnackBar(content: Text(l10n.importSuccess(transactions.length))),
           );
         }
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Import failed: $e')),
+        SnackBar(content: Text(l10n.importFailed('$e'))),
       );
     }
   }
 
-  Future<void> _exportCsv() async {
+  Future<void> _exportData() async {
     final repo = ref.read(transactionRepositoryProvider);
+    final l10n = context.l10n;
+
     try {
       await repo.exportToCsv();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Export failed: $e')),
+        SnackBar(content: Text(l10n.exportFailed('$e'))),
       );
     }
   }
@@ -124,6 +129,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final state = ref.watch(transactionNotifierProvider);
     final categoryState = ref.watch(categoryNotifierProvider);
 
@@ -133,7 +139,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ledger'),
+        title: Text(l10n.recordsTitle),
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.sort),
@@ -154,11 +160,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   break;
               }
             },
-            itemBuilder: (context) => const [
-              PopupMenuItem(value: 'date_desc', child: Text('Sort by date (newest)')),
-              PopupMenuItem(value: 'date_asc', child: Text('Sort by date (oldest)')),
-              PopupMenuItem(value: 'amount_desc', child: Text('Sort by amount (high)')),
-              PopupMenuItem(value: 'amount_asc', child: Text('Sort by amount (low)')),
+            itemBuilder: (context) => [
+              PopupMenuItem(value: 'date_desc', child: Text(l10n.sortDateNewest)),
+              PopupMenuItem(value: 'date_asc', child: Text(l10n.sortDateOldest)),
+              PopupMenuItem(value: 'amount_desc', child: Text(l10n.sortAmountHigh)),
+              PopupMenuItem(value: 'amount_asc', child: Text(l10n.sortAmountLow)),
             ],
           ),
           IconButton(
@@ -175,12 +181,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               if (value == 'import') {
                 _importCsv();
               } else if (value == 'export') {
-                _exportCsv();
+                _exportData();
               }
             },
-            itemBuilder: (context) => const [
-              PopupMenuItem(value: 'import', child: Text('Import CSV')),
-              PopupMenuItem(value: 'export', child: Text('Export CSV')),
+            itemBuilder: (context) => [
+              PopupMenuItem(value: 'import', child: Text(l10n.importCsvMenu)),
+              PopupMenuItem(value: 'export', child: Text(l10n.exportCsvMenu)),
             ],
           ),
         ],
@@ -206,7 +212,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               SizedBox(
                                 width: cardWidth,
                                 child: StatCard(
-                                  title: 'Income',
+                                  title: l10n.incomeLabel,
                                   value: state.summaryIncome,
                                   color: theme.colorScheme.primary,
                                   icon: Icons.arrow_downward,
@@ -215,7 +221,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               SizedBox(
                                 width: cardWidth,
                                 child: StatCard(
-                                  title: 'Expense',
+                                  title: l10n.expenseLabel,
                                   value: state.summaryExpense,
                                   color: theme.colorScheme.error,
                                   icon: Icons.arrow_upward,
@@ -224,7 +230,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               SizedBox(
                                 width: cardWidth,
                                 child: StatCard(
-                                  title: 'Balance',
+                                  title: l10n.balanceLabel,
                                   value: monthlyBalance,
                                   color: monthlyBalance >= 0 ? theme.colorScheme.primary : theme.colorScheme.error,
                                   icon: Icons.account_balance,
@@ -238,7 +244,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       TextField(
                         controller: _searchController,
                         decoration: InputDecoration(
-                          hintText: 'Search category or note',
+                          hintText: l10n.searchHint,
                           prefixIcon: const Icon(Icons.search),
                           suffixIcon: _searchController.text.isEmpty
                               ? null
@@ -263,13 +269,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           runSpacing: 8,
                           children: [
                             if (state.filter.dateRange != null)
-                              Chip(label: Text('Date: ${Formatters.date.format(state.filter.dateRange!.start)} - ${Formatters.date.format(state.filter.dateRange!.end)}')),
+                              Chip(label: Text('${l10n.dateLabel}: ${Formatters.date.format(state.filter.dateRange!.start)} - ${Formatters.date.format(state.filter.dateRange!.end)}')),
                             if (state.filter.type != null)
-                              Chip(label: Text('Type: ${state.filter.type == TransactionType.income ? 'Income' : 'Expense'}')),
+                              Chip(label: Text('${l10n.typeLabel}: ${state.filter.type == TransactionType.income ? l10n.incomeLabel : l10n.expenseLabel}')),
                             if (state.filter.category != null)
-                              Chip(label: Text('Category: ${state.filter.category}')),
+                              Chip(label: Text('${l10n.categoryLabel}: ${state.filter.category}')),
                             if (state.filter.keyword != null && state.filter.keyword!.isNotEmpty)
-                              Chip(label: Text('Search: ${state.filter.keyword}')),
+                              Chip(label: Text('${l10n.searchHint}: ${state.filter.keyword}')),
                             TextButton.icon(
                               onPressed: () {
                                 _searchController.clear();
@@ -277,7 +283,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 setState(() {});
                               },
                               icon: const Icon(Icons.clear),
-                              label: const Text('Clear filters'),
+                              label: Text(l10n.clearFilters),
                             ),
                           ],
                         ),
@@ -302,10 +308,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 250),
                       child: state.transactions.isEmpty
-                          ? const EmptyState(
+                          ? EmptyState(
                               icon: Icons.receipt_long,
-                              title: 'No records yet',
-                              message: 'Add your first transaction to start tracking.',
+                              title: l10n.noRecordsTitle,
+                              message: l10n.noRecordsMessage,
                             )
                           : ListView.builder(
                               key: const ValueKey('transaction-list'),
@@ -316,9 +322,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               itemBuilder: (context, index) {
                                 if (!sortByDate) {
                                   if (index == 0) {
-                                    return const Padding(
-                                      padding: EdgeInsets.fromLTRB(16, 8, 16, 12),
-                                      child: SectionHeader(title: 'Sorted by amount'),
+                                    return Padding(
+                                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                                      child: SectionHeader(title: l10n.groupedByAmountHeader),
                                     );
                                   }
 
@@ -339,12 +345,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         showDialog(
                                           context: context,
                                           builder: (context) => AlertDialog(
-                                            title: const Text('Delete record'),
-                                            content: const Text('Are you sure you want to delete this record?'),
+                                            title: Text(l10n.deleteRecordTitle),
+                                            content: Text(l10n.deleteRecordMessage),
                                             actions: [
                                               TextButton(
                                                 onPressed: () => Navigator.pop(context),
-                                                child: const Text('Cancel'),
+                                                child: Text(l10n.actionCancel),
                                               ),
                                               ElevatedButton(
                                                 onPressed: () {
@@ -356,7 +362,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                 style: ElevatedButton.styleFrom(
                                                   backgroundColor: theme.colorScheme.error,
                                                 ),
-                                                child: const Text('Delete'),
+                                                child: Text(l10n.actionDelete),
                                               ),
                                             ],
                                           ),
@@ -391,12 +397,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                             showDialog(
                                               context: context,
                                               builder: (context) => AlertDialog(
-                                                title: const Text('Delete record'),
-                                                content: const Text('Are you sure you want to delete this record?'),
+                                                title: Text(l10n.deleteRecordTitle),
+                                                content: Text(l10n.deleteRecordMessage),
                                                 actions: [
                                                   TextButton(
                                                     onPressed: () => Navigator.pop(context),
-                                                    child: const Text('Cancel'),
+                                                    child: Text(l10n.actionCancel),
                                                   ),
                                                   ElevatedButton(
                                                     onPressed: () {
@@ -408,7 +414,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                                     style: ElevatedButton.styleFrom(
                                                       backgroundColor: theme.colorScheme.error,
                                                     ),
-                                                    child: const Text('Delete'),
+                                                    child: Text(l10n.actionDelete),
                                                   ),
                                                 ],
                                               ),

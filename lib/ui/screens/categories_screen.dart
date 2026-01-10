@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/utils/localization_ext.dart';
 import '../../data/models/category.dart';
 import '../../data/models/transaction.dart';
 import '../../state/category_provider.dart';
@@ -34,7 +35,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text(category == null ? 'Add category' : 'Rename category'),
+          title: Text(category == null ? context.l10n.addCategoryDialogTitle : context.l10n.renameCategoryDialogTitle),
           content: Form(
             key: formKey,
             child: Column(
@@ -42,10 +43,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               children: [
                 TextFormField(
                   controller: controller,
-                  decoration: const InputDecoration(labelText: 'Category name'),
+                  decoration: InputDecoration(labelText: context.l10n.categoryNameLabel),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Enter a category name.';
+                      return context.l10n.categoryNameValidation;
                     }
                     return null;
                   },
@@ -53,9 +54,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 const SizedBox(height: 12),
                 if (category == null)
                   SegmentedButton<TransactionType>(
-                    segments: const [
-                      ButtonSegment(value: TransactionType.expense, label: Text('Expense')),
-                      ButtonSegment(value: TransactionType.income, label: Text('Income')),
+                    segments: [
+                      ButtonSegment(value: TransactionType.expense, label: Text(context.l10n.expenseLabel)),
+                      ButtonSegment(value: TransactionType.income, label: Text(context.l10n.incomeLabel)),
                     ],
                     selected: {selectedType},
                     onSelectionChanged: (selection) {
@@ -68,14 +69,14 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+            TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.l10n.actionCancel)),
             ElevatedButton(
               onPressed: () {
                 if (formKey.currentState!.validate()) {
                   Navigator.pop(context, true);
                 }
               },
-              child: const Text('Save'),
+              child: Text(context.l10n.actionSave),
             ),
           ],
         ),
@@ -101,17 +102,18 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final state = ref.watch(categoryNotifierProvider);
 
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Categories'),
-          bottom: const TabBar(
+          title: Text(l10n.categoriesTitle),
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Expense'),
-              Tab(text: 'Income'),
+              Tab(text: l10n.expenseLabel),
+              Tab(text: l10n.incomeLabel),
             ],
           ),
         ),
@@ -138,7 +140,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             _showCategoryDialog(type: type);
           },
           icon: const Icon(Icons.add),
-          label: const Text('Add category'),
+          label: Text(l10n.addCategoryFab),
         ),
       ),
     );
@@ -152,7 +154,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     if (categories.isEmpty) {
       return Center(
         child: Text(
-          'No categories available yet.',
+          context.l10n.emptyCategoriesMessage,
           style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
         ),
       );
@@ -166,7 +168,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         return Card(
           child: ListTile(
             title: Text(category.name),
-            subtitle: Text(category.isSystem ? 'System category' : 'Custom category'),
+            subtitle: Text(category.isSystem ? context.l10n.systemCategorySubtitle : context.l10n.customCategorySubtitle),
             trailing: Switch(
               value: category.isActive,
               onChanged: (value) {

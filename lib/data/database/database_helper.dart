@@ -293,19 +293,136 @@ class DatabaseHelper {
     return (result.first['total'] as num?)?.toDouble() ?? 0.0;
   }
 
-  Future<List<Map<String, dynamic>>> queryCategoryTotals({
-    required my_transaction.TransactionType type,
+  Future<double> getTotalAmountAnyType({
     required DateTime startDate,
     required DateTime endDate,
+    my_transaction.TransactionType? type,
   }) async {
     final db = await instance.database;
+    final where = StringBuffer('$columnDate BETWEEN ? AND ?');
+    final args = <Object?>[
+      startDate.toIso8601String(),
+      endDate.toIso8601String(),
+    ];
+    if (type != null) {
+      where.write(' AND $columnType = ?');
+      args.add(type.name);
+    }
+
+    final result = await db.rawQuery(
+      'SELECT SUM($columnAmount) as total FROM $transactionsTable WHERE $where',
+      args,
+    );
+    return (result.first['total'] as num?)?.toDouble() ?? 0.0;
+  }
+
+  Future<List<Map<String, dynamic>>> queryCategoryTotals({
+    required DateTime startDate,
+    required DateTime endDate,
+    my_transaction.TransactionType? type,
+    int? limit,
+  }) async {
+    final db = await instance.database;
+    final where = StringBuffer('$columnDate BETWEEN ? AND ?');
+    final args = <Object?>[
+      startDate.toIso8601String(),
+      endDate.toIso8601String(),
+    ];
+    if (type != null) {
+      where.write(' AND $columnType = ?');
+      args.add(type.name);
+    }
+
+    var sql = 'SELECT $columnCategory as category, SUM($columnAmount) as total '
+        'FROM $transactionsTable '
+        'WHERE $where '
+        'GROUP BY $columnCategory '
+        'ORDER BY total DESC';
+    if (limit != null) {
+      sql = '$sql LIMIT $limit';
+    }
+
+    return db.rawQuery(sql, args);
+  }
+
+  Future<List<Map<String, dynamic>>> queryDailyTotals({
+    required DateTime startDate,
+    required DateTime endDate,
+    my_transaction.TransactionType? type,
+  }) async {
+    final db = await instance.database;
+    final where = StringBuffer('$columnDate BETWEEN ? AND ?');
+    final args = <Object?>[
+      startDate.toIso8601String(),
+      endDate.toIso8601String(),
+    ];
+    if (type != null) {
+      where.write(' AND $columnType = ?');
+      args.add(type.name);
+    }
+
     return db.rawQuery(
-      'SELECT $columnCategory as category, SUM($columnAmount) as total '
+      'SELECT substr($columnDate, 1, 10) as day, SUM($columnAmount) as total '
       'FROM $transactionsTable '
-      'WHERE $columnType = ? AND $columnDate BETWEEN ? AND ? '
-      'GROUP BY $columnCategory '
+      'WHERE $where '
+      'GROUP BY day '
+      'ORDER BY day ASC',
+      args,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> queryMonthlyTotals({
+    required DateTime startDate,
+    required DateTime endDate,
+    my_transaction.TransactionType? type,
+  }) async {
+    final db = await instance.database;
+    final where = StringBuffer('$columnDate BETWEEN ? AND ?');
+    final args = <Object?>[
+      startDate.toIso8601String(),
+      endDate.toIso8601String(),
+    ];
+    if (type != null) {
+      where.write(' AND $columnType = ?');
+      args.add(type.name);
+    }
+
+    return db.rawQuery(
+      'SELECT substr($columnDate, 1, 7) as month, SUM($columnAmount) as total '
+      'FROM $transactionsTable '
+      'WHERE $where '
+      'GROUP BY month '
+      'ORDER BY month ASC',
+      args,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> queryNoteTotalsForCategory({
+    required String category,
+    required DateTime startDate,
+    required DateTime endDate,
+    my_transaction.TransactionType? type,
+  }) async {
+    final db = await instance.database;
+    final where = StringBuffer('$columnCategory = ? AND $columnDate BETWEEN ? AND ?');
+    final args = <Object?>[
+      category,
+      startDate.toIso8601String(),
+      endDate.toIso8601String(),
+    ];
+    if (type != null) {
+      where.write(' AND $columnType = ?');
+      args.add(type.name);
+    }
+
+    return db.rawQuery(
+      'SELECT CASE WHEN TRIM($columnNote) = \'\' THEN \'\' ELSE $columnNote END as note, '
+      'SUM($columnAmount) as total '
+      'FROM $transactionsTable '
+      'WHERE $where '
+      'GROUP BY note '
       'ORDER BY total DESC',
-      [type.name, startDate.toIso8601String(), endDate.toIso8601String()],
+      args,
     );
   }
 

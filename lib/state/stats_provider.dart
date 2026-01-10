@@ -10,43 +10,73 @@ import 'transaction_provider.dart';
 
 final budgetRepositoryProvider = Provider((ref) => BudgetRepository());
 
+enum AnalyticsPeriod { month, year }
+
+enum AnalyticsChartType { pie, bar, line }
+
+enum AnalyticsAmountFilter { all, expense, income }
+
 class StatsState {
-  final DateTime month;
+  final AnalyticsPeriod period;
+  final AnalyticsChartType chartType;
+  final AnalyticsAmountFilter amountFilter;
+  final int year;
+  final int month;
   final double income;
   final double expense;
-  final List<CategoryTotal> incomeByCategory;
-  final List<CategoryTotal> expenseByCategory;
+  final List<double> series;
+  final List<CategoryTotal> categoryTotals;
+  final List<CategoryTotal> expenseRanking;
+  final bool showAllRanking;
   final Budget? totalBudget;
   final bool isLoading;
   final String? error;
 
   const StatsState({
+    required this.period,
+    required this.chartType,
+    required this.amountFilter,
+    required this.year,
     required this.month,
     required this.income,
     required this.expense,
-    required this.incomeByCategory,
-    required this.expenseByCategory,
+    required this.series,
+    required this.categoryTotals,
+    required this.expenseRanking,
+    this.showAllRanking = false,
     this.totalBudget,
     this.isLoading = false,
     this.error,
   });
 
   StatsState copyWith({
-    DateTime? month,
+    AnalyticsPeriod? period,
+    AnalyticsChartType? chartType,
+    AnalyticsAmountFilter? amountFilter,
+    int? year,
+    int? month,
     double? income,
     double? expense,
-    List<CategoryTotal>? incomeByCategory,
-    List<CategoryTotal>? expenseByCategory,
+    List<double>? series,
+    List<CategoryTotal>? categoryTotals,
+    List<CategoryTotal>? expenseRanking,
+    bool? showAllRanking,
     Object? totalBudget = _unsetValue,
     bool? isLoading,
     String? error,
   }) {
     return StatsState(
+      period: period ?? this.period,
+      chartType: chartType ?? this.chartType,
+      amountFilter: amountFilter ?? this.amountFilter,
+      year: year ?? this.year,
       month: month ?? this.month,
       income: income ?? this.income,
       expense: expense ?? this.expense,
-      incomeByCategory: incomeByCategory ?? this.incomeByCategory,
-      expenseByCategory: expenseByCategory ?? this.expenseByCategory,
+      series: series ?? this.series,
+      categoryTotals: categoryTotals ?? this.categoryTotals,
+      expenseRanking: expenseRanking ?? this.expenseRanking,
+      showAllRanking: showAllRanking ?? this.showAllRanking,
       totalBudget: totalBudget == _unsetValue ? this.totalBudget : totalBudget as Budget?,
       isLoading: isLoading ?? this.isLoading,
       error: error,
@@ -56,66 +86,121 @@ class StatsState {
 
 const _unsetValue = Object();
 
-// Loads monthly statistics and budget data for the stats screen.
+// Loads analytics data (daily/monthly series, category totals, and budgets) for the stats screen.
 class StatsNotifier extends Notifier<StatsState> {
   @override
   StatsState build() {
     final now = DateTime.now();
-    _loadStats(now);
+    // Load stats after state is initialized
+    Future.microtask(() => _loadStats());
     return StatsState(
-      month: DateTime(now.year, now.month),
+      period: AnalyticsPeriod.month,
+      chartType: AnalyticsChartType.pie,
+      amountFilter: AnalyticsAmountFilter.all,
+      year: now.year,
+      month: now.month,
       income: 0,
       expense: 0,
-      incomeByCategory: const [],
-      expenseByCategory: const [],
+      series: const [],
+      categoryTotals: const [],
+      expenseRanking: const [],
       isLoading: true,
     );
   }
 
-  Future<void> _loadStats(DateTime month) async {
-    // Fetch monthly totals and category breakdowns in a single refresh.
+  DateTimeRange _currentRange(StatsState state) {
+    if (state.period == AnalyticsPeriod.month) {
+      return DateTimeRange(
+        start: DateTime(state.year, state.month, 1),
+        end: DateTime(state.year, state.month + 1, 0, 23, 59, 59),
+      );
+    }
+    return DateTimeRange(
+      start: DateTime(state.year, 1, 1),
+      end: DateTime(state.year + 1, 1, 0, 23, 59, 59),
+    );
+  }
+
+  TransactionType? _typeForFilter(AnalyticsAmountFilter filter) {
+    switch (filter) {
+      case AnalyticsAmountFilter.income:
+        return TransactionType.income;
+      case AnalyticsAmountFilter.expense:
+        return TransactionType.expense;
+      case AnalyticsAmountFilter.all:
+        return null;
+    }
+  }
+
+  Future<void> _loadStats() async {
     final transactionRepo = ref.read(transactionRepositoryProvider);
     final budgetRepo = ref.read(budgetRepositoryProvider);
-    final range = _monthRange(month);
+    final current = state;
+    final range = _currentRange(current);
 
     try {
-      final income = await transactionRepo.getTotalAmount(
+      final income = await transactionRepo.getTotalAmountAnyType(
+        startDate: range.start,
+        endDate: range.end,
         type: TransactionType.income,
+      );
+      final expense = await transactionRepo.getTotalAmountAnyType(
         startDate: range.start,
         endDate: range.end,
-      );
-      final expense = await transactionRepo.getTotalAmount(
         type: TransactionType.expense,
-        startDate: range.start,
-        endDate: range.end,
-      );
-      final incomeByCategory = await transactionRepo.getCategoryTotals(
-        type: TransactionType.income,
-        startDate: range.start,
-        endDate: range.end,
-      );
-      final expenseByCategory = await transactionRepo.getCategoryTotals(
-        type: TransactionType.expense,
-        startDate: range.start,
-        endDate: range.end,
       );
 
-      final monthKey = Formatters.month.format(month);
-      final budgets = await budgetRepo.getBudgets(monthKey: monthKey);
+      final selectedType = _typeForFilter(current.amountFilter);
+
+      Map<int, double> seriesTotals;
+      int points;
+      if (current.period == AnalyticsPeriod.month) {
+        seriesTotals = await transactionRepo.getDailyTotals(
+          year: current.year,
+          month: current.month,
+          type: selectedType,
+        );
+        points = DateTime(current.year, current.month + 1, 0).day;
+      } else {
+        seriesTotals = await transactionRepo.getMonthlyTotals(
+          year: current.year,
+          type: selectedType,
+        );
+        points = 12;
+      }
+      final series = List<double>.generate(points, (index) => seriesTotals[index + 1] ?? 0.0);
+
+      final categoryTotals = await transactionRepo.getCategoryTotals(
+        startDate: range.start,
+        endDate: range.end,
+        type: selectedType,
+      );
+
+      final expenseRanking = await transactionRepo.getCategoryTotals(
+        startDate: range.start,
+        endDate: range.end,
+        type: TransactionType.expense,
+        limit: current.showAllRanking ? null : 10,
+      );
+
       Budget? totalBudget;
-      for (final budget in budgets) {
-        if (budget.category == Budget.totalCategory) {
-          totalBudget = budget;
-          break;
+      if (current.period == AnalyticsPeriod.month) {
+        final monthKey = Formatters.month.format(DateTime(current.year, current.month));
+        final budgets = await budgetRepo.getBudgets(monthKey: monthKey);
+        for (final budget in budgets) {
+          if (budget.category == Budget.totalCategory) {
+            totalBudget = budget;
+            break;
+          }
         }
       }
 
       state = state.copyWith(
-        month: DateTime(month.year, month.month),
         income: income,
         expense: expense,
-        incomeByCategory: incomeByCategory,
-        expenseByCategory: expenseByCategory,
+        series: series,
+        categoryTotals: categoryTotals,
+        expenseRanking: expenseRanking,
         totalBudget: totalBudget,
         isLoading: false,
         error: null,
@@ -125,33 +210,63 @@ class StatsNotifier extends Notifier<StatsState> {
     }
   }
 
-  DateTimeRange _monthRange(DateTime month) {
-    return DateTimeRange(
-      start: DateTime(month.year, month.month, 1),
-      end: DateTime(month.year, month.month + 1, 0, 23, 59, 59),
+  Future<void> changePeriod(AnalyticsPeriod period) async {
+    final now = DateTime.now();
+    state = state.copyWith(
+      period: period,
+      month: period == AnalyticsPeriod.month ? state.month : now.month,
+      isLoading: true,
+      error: null,
     );
+    await _loadStats();
   }
 
-  Future<void> changeMonth(DateTime month) async {
+  Future<void> changeYear(int year) async {
+    state = state.copyWith(year: year, isLoading: true, error: null);
+    await _loadStats();
+  }
+
+  Future<void> changeMonth(int month) async {
+    state = state.copyWith(month: month, isLoading: true, error: null);
+    await _loadStats();
+  }
+
+  Future<void> changeChartType(AnalyticsChartType type) async {
+    state = state.copyWith(chartType: type);
+  }
+
+  Future<void> changeAmountFilter(AnalyticsAmountFilter filter) async {
+    state = state.copyWith(amountFilter: filter, isLoading: true, error: null);
+    await _loadStats();
+  }
+
+  Future<void> toggleRankingViewAll(bool showAll) async {
+    state = state.copyWith(showAllRanking: showAll, isLoading: true, error: null);
+    await _loadStats();
+  }
+
+  Future<void> refresh() async {
     state = state.copyWith(isLoading: true, error: null);
-    await _loadStats(month);
+    await _loadStats();
   }
 
   Future<void> setTotalBudget(double amount) async {
     final budgetRepo = ref.read(budgetRepositoryProvider);
-    final monthKey = Formatters.month.format(state.month);
+    final monthKey = Formatters.month.format(DateTime(state.year, state.month));
     await budgetRepo.upsertBudget(
       Budget(monthKey: monthKey, category: Budget.totalCategory, amount: amount),
     );
-    await _loadStats(state.month);
+    await _loadStats();
   }
 
   Future<void> removeTotalBudget() async {
     final budgetRepo = ref.read(budgetRepositoryProvider);
-    final monthKey = Formatters.month.format(state.month);
+    final monthKey = Formatters.month.format(DateTime(state.year, state.month));
     await budgetRepo.deleteBudget(monthKey: monthKey, category: Budget.totalCategory);
-    await _loadStats(state.month);
+    await _loadStats();
   }
+
+  DateTimeRange currentRange() => _currentRange(state);
 }
 
 final statsNotifierProvider = NotifierProvider<StatsNotifier, StatsState>(

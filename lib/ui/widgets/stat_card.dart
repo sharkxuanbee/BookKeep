@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/utils/formatters.dart';
+import '../../core/utils/localization_ext.dart';
 
 class StatCard extends StatelessWidget {
   final String title;
@@ -46,7 +47,10 @@ class StatCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            Formatters.currency.format(value),
+            Formatters.currencyText(
+              amount: value,
+              locale: context.locale,
+            ),
             style: theme.textTheme.titleMedium?.copyWith(
               color: color,
               fontWeight: FontWeight.bold,

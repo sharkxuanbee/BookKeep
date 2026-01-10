@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/utils/formatters.dart';
+import '../../core/utils/localization_ext.dart';
 import '../../data/models/category.dart';
 import '../../data/models/transaction.dart';
 import '../../state/category_provider.dart';
@@ -44,12 +46,13 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     // Persist edits through the notifier so list + summary refresh together.
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
+    final l10n = context.l10n;
 
     final transaction = Transaction(
       id: widget.transaction?.id,
       date: _date,
       type: _type,
-      category: _category ?? 'Uncategorized',
+      category: _category ?? l10n.uncategorizedLabel,
       amount: _amount,
       note: _note,
     );
@@ -84,29 +87,29 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add category'),
+        title: Text(context.l10n.addCategoryDialogTitle),
         content: Form(
           key: formKey,
           child: TextFormField(
             controller: controller,
-            decoration: const InputDecoration(labelText: 'Category name'),
+            decoration: InputDecoration(labelText: context.l10n.categoryNameLabel),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Enter a category name.';
+                return context.l10n.categoryNameValidation;
               }
               return null;
             },
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.l10n.actionCancel)),
           ElevatedButton(
             onPressed: () {
               if (formKey.currentState!.validate()) {
                 Navigator.pop(context, true);
               }
             },
-            child: const Text('Add'),
+            child: Text(context.l10n.actionAdd),
           ),
         ],
       ),
@@ -126,6 +129,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final currencySymbol = NumberFormat.simpleCurrency(locale: context.locale.toLanguageTag()).currencySymbol;
     final categoryState = ref.watch(categoryNotifierProvider);
     final categories = _categoriesForType(categoryState);
     final availableCategories = [...categories];
@@ -140,7 +145,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.transaction != null ? 'Edit record' : 'New record'),
+        title: Text(widget.transaction != null ? l10n.editRecordTitle : l10n.newRecordTitle),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -149,7 +154,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Date', style: theme.textTheme.bodyMedium),
+              Text(l10n.dateLabel, style: theme.textTheme.bodyMedium),
               const SizedBox(height: 8),
               InkWell(
                 onTap: _pickDate,
@@ -169,12 +174,12 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text('Type', style: theme.textTheme.bodyMedium),
+              Text(l10n.typeLabel, style: theme.textTheme.bodyMedium),
               const SizedBox(height: 8),
               SegmentedButton<TransactionType>(
-                segments: const [
-                  ButtonSegment(value: TransactionType.income, label: Text('Income')),
-                  ButtonSegment(value: TransactionType.expense, label: Text('Expense')),
+                segments: [
+                  ButtonSegment(value: TransactionType.income, label: Text(l10n.incomeLabel)),
+                  ButtonSegment(value: TransactionType.expense, label: Text(l10n.expenseLabel)),
                 ],
                 selected: {_type},
                 onSelectionChanged: (newSelection) {
@@ -188,11 +193,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Category', style: theme.textTheme.bodyMedium),
+                  Text(l10n.categoryLabel, style: theme.textTheme.bodyMedium),
                   TextButton.icon(
                     onPressed: _showAddCategoryDialog,
                     icon: const Icon(Icons.add),
-                    label: const Text('New'),
+                    label: Text(l10n.newCategoryButton),
                   ),
                 ],
               ),
@@ -211,25 +216,25 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                 decoration: const InputDecoration(),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Select a category.';
+                    return l10n.categoryValidation;
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
-              Text('Amount', style: theme.textTheme.bodyMedium),
+              Text(l10n.amountLabel, style: theme.textTheme.bodyMedium),
               const SizedBox(height: 8),
               TextFormField(
                 initialValue: _amount == 0 ? '' : _amount.toStringAsFixed(2),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(prefixText: '\$ '),
+                decoration: InputDecoration(prefixText: '$currencySymbol '),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Enter an amount.';
+                    return l10n.amountValidationRequired;
                   }
                   final amount = double.tryParse(value);
                   if (amount == null || amount <= 0) {
-                    return 'Enter a valid amount.';
+                    return l10n.amountValidationPositive;
                   }
                   return null;
                 },
@@ -238,12 +243,12 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              Text('Note', style: theme.textTheme.bodyMedium),
+              Text(l10n.noteLabel, style: theme.textTheme.bodyMedium),
               const SizedBox(height: 8),
               TextFormField(
                 initialValue: _note,
                 maxLines: 3,
-                decoration: const InputDecoration(hintText: 'Optional note'),
+                decoration: InputDecoration(hintText: l10n.noteHint),
                 onSaved: (value) {
                   _note = value?.trim() ?? '';
                 },
@@ -254,7 +259,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () => _saveTransaction(context),
-                  child: Text(widget.transaction != null ? 'Save changes' : 'Add record'),
+                  child: Text(widget.transaction != null ? l10n.saveChangesButton : l10n.addRecordButton),
                 ),
               ),
             ],
